@@ -11,7 +11,7 @@ import traceback
 import sys
 
 token = ''  # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
-channel_id = '  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
+channel_id = ''  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
 kullanıcı_id = ''  # Buraya kendi kullanıcı id nizi koymanız gerekiyor
 
 
