@@ -10,9 +10,9 @@ import os
 import traceback
 import sys
 
-token = 'Discord-Token'  # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
-channel_id = 'Channel-id'  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
-kullanıcı_id = 'isteye bağlı kullanıcı id bazen gerekebilir kullanırken ekleyebilirsiniz isterseniz.'  # Buraya kendi kullanıcı id nizi koymanız gerekiyor
+token = 'ODg2NjE2OTYyNjc4MDMwNDI3.GuIuLd.Yzv8syn4HCLstRDSAmQYy5JSgRf9VCll2Z0cO8'  # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
+channel_id = '1132261852353658921'  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
+kullanıcı_id = '886616962678030427'  # Buraya kendi kullanıcı id nizi koymanız gerekiyor
 
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -82,8 +82,9 @@ def create_crash_report(error_msg):
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
-        with open("crash_reports.txt", "w") as report_file:
-            report_file.write(error_msg)
+        with open("crash_reports.txt", "w", encoding="utf-8") as report_file:
+            zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
+            report_file.write(error_msg, zaman)
 
     except Exception as e:
         print("Crash raporu oluşturulurken bir hata oluştu:", str(e))
@@ -115,9 +116,10 @@ def bot():
                 print(f"{mesaj:<35}{zaman:>70}")
                 count += 1
                 
-                with open("info.txt", "a") as dosya:
+                with open("log.txt", "a", encoding="utf-8") as dosya:
                     dosya.write(f"{mesaj:<35}{zaman:>70}\n")
             else:
+                zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
                 mesaj = f"Mesaj gönderilirken bir hata oluştu: {r.status_code}"
                 print(f"{mesaj:<50}{zaman:>70}")
                 pygame.mixer.music.load("Sound/hata.wav")
@@ -126,6 +128,7 @@ def bot():
                     pygame.time.Clock().tick(10)
                 
         except Exception as e:
+
             error_msg = traceback.format_exc()
             create_crash_report(error_msg)
 
@@ -148,7 +151,7 @@ def bot():
                         print(f"{mesaj:<35}{zaman:>70}")
                         count = 1  
                         
-                        with open("info.txt", "a") as dosya:
+                        with open("log.txt", "a", encoding="utf-8") as dosya:
                             dosya.write(f"{mesaj:<35}{zaman:>70}\n")
                         
                         pygame.mixer.music.load("Sound/buldum.wav")
@@ -181,7 +184,7 @@ def bot():
                                     zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
                                     mesaj_tekrar = f"Tekrar mesajı gönderildi: {wcount}"
                                     print(f"{mesaj_tekrar:<35}{zaman:>70}")
-                                    with open("info.txt", "a") as dosya:
+                                    with open("log.txt", "a", encoding="utf-8") as dosya:
                                         dosya.write(f"{mesaj_tekrar:<35}{zaman:>70}\n")
                                 else:
                                     mesaj = f"Mesaj gönderilirken bir hata oluştu: {r.status_code}"
@@ -212,7 +215,7 @@ def bot():
                                             print(f"{mesaj:<35}{zaman:>70}")
                                             count = 1  
                             
-                                            with open("info.txt", "a") as dosya:
+                                            with open("log.txt", "a", encoding="utf-8") as dosya:
                                                 dosya.write(f"{mesaj:<35}{zaman:>70}\n")
                             
                                                 pygame.mixer.music.load("Sound/buldum.wav")
@@ -244,9 +247,9 @@ def bot():
             print("Bir hata oluştu, crash raporu oluşturuldu.")
             break
 
-        time.sleep(1.6)  
+        time.sleep(1.8)  
 
-if not os.path.exists("info.txt"):
-    open("info.txt", "w").close()  
+if not os.path.exists("log.txt"):
+    open("log.txt", "w").close()  
 
 bot()
