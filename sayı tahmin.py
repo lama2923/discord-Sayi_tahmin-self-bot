@@ -10,9 +10,9 @@ import os
 import traceback
 import sys
 
-token = 'ODg2NjE2OTYyNjc4MDMwNDI3.GuIuLd.Yzv8syn4HCLstRDSAmQYy5JSgRf9VCll2Z0cO8'  # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
-channel_id = '1132261852353658921'  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
-kullanıcı_id = '886616962678030427'  # Buraya kendi kullanıcı id nizi koymanız gerekiyor
+token = ''  # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
+channel_id = '  # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
+kullanıcı_id = ''  # Buraya kendi kullanıcı id nizi koymanız gerekiyor
 
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
