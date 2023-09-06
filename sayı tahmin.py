@@ -32,6 +32,9 @@ pygame.init()
 sys.stderr.close()
 sys.stderr = original_stderr
 
+if not os.path.exists("Logs"):
+    os.mkdir("Logs")
+
 
 db_connection_log = sqlite3.connect("Logs/log.db")
 db_cursor_log = db_connection_log.cursor()
