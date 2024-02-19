@@ -12,7 +12,6 @@ import sqlite3
 import tkinter as tk
 import threading
 import multiprocessing
-import sys
 import random
 
 
@@ -23,19 +22,14 @@ channel_id = 'x' # Buraya sayı tahmin oynayacağınız kanalın idsini koymanı
 
 kullanıcı_id = 'x' # Burası Önemsiz! kodu incelersiz neden koyduğumu anlarsınız diye düşünüyorum! ama sizin doldurmanıza gerek yok! (opyisonel belki sizde techno bot ile yapıcaksınz)
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
-original_stderr = sys.stderr
-sys.stderr = open("pygame_messages.txt", "w")
 
 
 tz = pytz.timezone('Europe/Istanbul')
 
 
 
-sys.stderr.close()
-sys.stderr = original_stderr
 klasor_adi = "Logs"
 if not os.path.exists(klasor_adi):
     os.makedirs(klasor_adi)
