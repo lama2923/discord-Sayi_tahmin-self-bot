@@ -167,8 +167,7 @@ def bot_thread(quit_flag):
 
         try:
             
-            r = requests.get(
-                f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
+            r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
             if r.status_code == 200:
                 messages = r.json()
                 if messages:
@@ -241,12 +240,10 @@ def bot_thread(quit_flag):
 
                             try:
                                 
-                                r = requests.post(f'https://discord.com/api/v9/channels/{channel_id}/messages',
-                                                  data=payload, headers=headers)
+                                r = requests.post(f'https://discord.com/api/v9/channels/{channel_id}/messages',data=payload, headers=headers)
 
                                 if r.status_code == 200:
-                                    zaman = datetime.datetime.now(
-                                        tz).strftime("%Y-%m-%d   %H:%M:%S")
+                                    zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
                                     Mesaj_gönderildi = time.time()
                                     mesaj_tekrar = f"Tekrar mesajı gönderildi: {wcount}"
                                     print(f"{mesaj_tekrar:<35}{zaman:>70}")
@@ -266,8 +263,7 @@ def bot_thread(quit_flag):
 
                             try:
                                 
-                                r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
-                                                 headers=headers)
+                                r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',headers=headers)
                                 if r.status_code == 200:
                                     messages = r.json()
                                     if messages:
@@ -299,8 +295,7 @@ def bot_thread(quit_flag):
                                             count = 1
 
 
-                                            log_to_database_log(
-                                                zaman, yazı, username, user_id, gcontent)
+                                            log_to_database_log(zaman, yazı, username, user_id, gcontent)
 
 
 
@@ -329,8 +324,7 @@ def bot_thread(quit_flag):
                                     else:
                                         print("Kanalda henüz mesaj yok.")
                                 else:
-                                    print(
-                                        f"Mesajları alırken bir hata oluştu (1): {r.status_code}")
+                                    print(f"Mesajları alırken bir hata oluştu (1): {r.status_code}")
                             except Exception as e:
                                 error_msg = traceback.format_exc()
                                 create_crash_report(error_msg)
