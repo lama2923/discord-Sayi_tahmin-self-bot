@@ -26,8 +26,9 @@ kullanıcı_id = 'x' # Burası Önemsiz! kodu incelersiz neden koyduğumu anlars
 
 
 
-tz = pytz.timezone('Europe/Istanbul')
 
+
+tz = pytz.timezone('Europe/Istanbul')
 
 
 klasor_adi = "Logs"
@@ -64,54 +65,6 @@ def log_to_database_log(log_time, log_message, bot_name, bot_id, bot_reply):
                           (log_message, log_time, bot_name, bot_id, bot_reply))
     db_connection_log.commit()
 
-
-def delete_last_log_from_database_log():
-    try:
-
-        db_cursor_log.execute('SELECT MAX(id) FROM logs')
-        last_log_id = db_cursor_log.fetchone()[0]
-
-        if last_log_id is not None:
-
-            db_cursor_log.execute(
-                'DELETE FROM logs WHERE id = ?', (last_log_id,))
-            db_connection_log.commit()
-            print(f'Son log (ID: {last_log_id}) başarıyla silindi.')
-        else:
-            print('ERROR!')
-    except sqlite3.Error as e:
-        print(f'Hata oluştu: {str(e)}')
-
-
-def internet_available():
-    try:
-        requests.get("https://www.google.com", timeout=5)
-        return True
-    except requests.ConnectionError:
-        return False
-
-
-def check_internet_connection():
-    anlamsız_sayı = 0
-    while not internet_available():
-        anlamsız_sayı += 1
-        if anlamsız_sayı == 5:
-            exit(1)
-        print("Internet bağlantısı yok.")
-        time.sleep(0.5)
-
-
-def check_internet_connection_get():
-    anlamsız_sayı = 0
-    while not internet_available():
-        anlamsız_sayı += 1
-        if anlamsız_sayı == 1:
-            delete_last_log_from_database_log()
-        elif anlamsız_sayı == 5:
-            exit(1)
-
-        print("Internet bağlantısı yok.")
-        time.sleep(0.5)
 
 
 def create_crash_report(error_msg):
@@ -163,7 +116,7 @@ def bot_thread(quit_flag):
         }
 
         try:
-            check_internet_connection()
+            
 
             # bu kısım eğer kanalın Couldown ayarı açıksa kullanabilirsiniz kendi Couldownınıza göre
             if Mesaj_gönderildi != None or Mesaj_gönderildi:
@@ -213,7 +166,7 @@ def bot_thread(quit_flag):
         time.sleep(1)
 
         try:
-            check_internet_connection_get()
+            
             r = requests.get(
                 f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
             if r.status_code == 200:
@@ -287,7 +240,7 @@ def bot_thread(quit_flag):
                             }
 
                             try:
-                                check_internet_connection()
+                                
                                 r = requests.post(f'https://discord.com/api/v9/channels/{channel_id}/messages',
                                                   data=payload, headers=headers)
 
@@ -312,7 +265,7 @@ def bot_thread(quit_flag):
                             time.sleep(1)
 
                             try:
-                                check_internet_connection_get()
+                                
                                 r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
                                                  headers=headers)
                                 if r.status_code == 200:
