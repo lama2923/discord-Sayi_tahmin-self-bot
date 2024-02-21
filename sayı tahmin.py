@@ -51,7 +51,8 @@ db_cursor_log.execute('''
         log_time TEXT,
         bot_name TEXT,
         bot_id iNTEGER,
-        bot_reply TEXT
+        bot_reply TEXT,
+        message_ID TEXT
     )
 ''')
 db_connection_log.commit()
@@ -60,9 +61,9 @@ db_connection_log.commit()
 
 
 
-def log_to_database_log(log_time, log_message, bot_name, bot_id, bot_reply):
-    db_cursor_log.execute('INSERT INTO logs (log_message, log_time, bot_name, bot_id, bot_reply) VALUES (?, ?, ?, ?, ?)',
-                          (log_message, log_time, bot_name, bot_id, bot_reply))
+def log_to_database_log(log_time, log_message, bot_name, bot_id, bot_reply, message_ID):
+    db_cursor_log.execute('INSERT INTO logs (log_message, log_time, bot_name, bot_id, bot_reply, message_ID) VALUES (?, ?, ?, ?, ?, ?)',
+                          (log_message, log_time, bot_name, bot_id, bot_reply, message_ID))
     db_connection_log.commit()
 
 
@@ -75,7 +76,6 @@ def create_crash_report(error_msg):
             report_file.write(f"{error_msg}\n")
             report_file.write(f"Tarih: {zaman}\n")
 
-        log_to_database_log(zaman)
 
     except Exception as e:
         print("Crash raporu oluşturulurken bir hata oluştu:", str(e))
@@ -118,11 +118,11 @@ def bot_thread(quit_flag):
         try:
             
 
-            # bu kısım eğer kanalın Couldown ayarı açıksa kullanabilirsiniz kendi Couldownınıza göre
+            # bu kısım eğer kanalın Couldown ayarı açıksa kullanabilirsiniz kendi Couldownınıza göre ayarlayabilirsiniz
             if Mesaj_gönderildi != None or Mesaj_gönderildi:
             
                 while True:
-                    if time.time() - Mesaj_gönderildi < 4.8:
+                    if time.time() - Mesaj_gönderildi < 4.8 : #bu kısımdaki 4.8, aslında kaç saniye beklemesini söylüyor burasını kendi Couldownunuza göre ayarlayabilirsiniz. 
 
                         pass
                     else:
@@ -132,7 +132,7 @@ def bot_thread(quit_flag):
                     time.sleep(0.1)
             else:
                 time.sleep(5.75)
-            # bu kısım eğer kanalın Couldown ayarı açıksa kullanabilirsiniz kendi Couldownınıza göre
+            # bu kısım eğer kanalın Couldown ayarı açıksa kullanabilirsiniz kendi Couldownınıza göre ayarlayabilirsiniz
 
             
             
@@ -149,8 +149,8 @@ def bot_thread(quit_flag):
                 print(f"{mesaj:<35}{zaman:>70}")
 
             else:
-                zaman = datetime.datetime.now(
-                    tz).strftime("%Y-%m-%d   %H:%M:%S")
+                zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
+                
                 Mesaj_gönderildi = False
                 mesaj = f"Mesaj gönderilirken bir hata oluştu: {r.status_code}\{r}"
                 print(f"{mesaj:<50}{zaman:>55}")
@@ -166,178 +166,199 @@ def bot_thread(quit_flag):
         time.sleep(1)
 
         try:
-            
-            r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
-            if r.status_code == 200:
-                messages = r.json()
-                if messages:
+            for x in range(1, 8):
+                
+                r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
+                
+                if r.status_code == 200:
+                    messages = r.json()
+                    if messages:
+                        
+                    
+                        gcontent = ""
+                        username = ""
+                        user_id = ""
+                        time.sleep(0.3)
+                        for INDEX, mesaj in enumerate(messages):
+                            if INDEX == 10:
+                                break
+                            
+                            content = mesaj['content']
+                            if content.startswith(f'<@{kullanıcı_id}>'):
+                                
+                                if mesaj['id'] in okudum:
+                                    pass
+                                else:
+                                    
+                                    okudum.append(mesaj["id"])
+                                    mesaj_ıd = mesaj["id"]
+                                    user_id = mesaj['author']['id']
+                                    username = mesaj['author']['username']
+                                    gcontent = mesaj["content"]
+                                    break
+                                
+                if user_id == "":
+                    pass
+                else:
+                    break
 
-
-                    gcontent = ""
-                    username = ""
-                    user_id = ""
-                    for INDEX, mesaj in enumerate(messages):
-                        if INDEX == 10:
+                        
+            # burası ÇOK ÖNEMLİ buraya sayıyı bulunca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
+            if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler!'):
+                
+                Correct_Number_Count += 1
+                yazı = f"Doğru sayı bulundu doğru sayı: {count}, Bu {Correct_Number_Count}. Doğrumuz"
+                
+                print(f"{yazı:<35}{zaman:>70}")
+                count = 0
+                
+                log_to_database_log(zaman, yazı, username, user_id, gcontent, mesaj_ıd)
+                
+                count += 1
+                
+                pass
+            # burası ÇOK ÖNEMLİ buraya sayıyı bulunamayınca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
+            elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan'):
+                yazı = f"Mesaj gönderildi: {count}"
+                log_to_database_log(
+                    zaman, yazı, username, user_id, gcontent, mesaj_ıd)
+                count += 1
+                pass
+            else:
+                time.sleep(3)
+                random_value = random.choice(range(1, 6))
+                time.sleep(int(random_value))
+                random_value = random.choice(range(1, 6))
+                time.sleep(int(random_value))
+                while True:
+                    with quit_flag_lock:
+                        if quit_flag.value:
+                            exit(1)
                             break
-                        content = mesaj['content']
-                        if content.startswith(f'<@{kullanıcı_id}>'):
-                            if mesaj['id'] in okudum:
+                        
+                    if count > 100:
+                        count = 1
+                    wcount = count
+                    payload = {
+                        'content': str(wcount)
+                    }
+                    headers = {
+                        'Authorization': f'{token}'
+                    }
+                    try:
+
+                        r = requests.post(f'https://discord.com/api/v9/channels/{channel_id}/messages',
+                                          data=payload, headers=headers)
+                        if r.status_code == 200:
+                            
+                            zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
+                            
+                            Mesaj_gönderildi = time.time()
+                            
+                            mesaj_tekrar = f"Tekrar mesajı gönderildi: {wcount}"
+                            
+                            print(f"{mesaj_tekrar:<35}{zaman:>70}")
+                        else:
+                            
+                            mesaj = f"Mesaj gönderilirken bir hata oluştu (1): {r.status_code}"
+                            print(f"{mesaj:<50}{zaman:>70}")
+                    except Exception as e:
+                        
+                        error_msg = traceback.format_exc()
+                        create_crash_report(error_msg)
+                        print("Bir hata oluştu, crash raporu oluşturuldu.")
+                        break
+                    time.sleep(1)
+                    try:
+                        for x in range(1, 8):
+                            
+                            r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
+                                             headers=headers)
+                            if r.status_code == 200:
+                                
+                                messages = r.json()
+                                if messages:
+                                    
+                                    gcontent = ""
+                                    username = ""
+                                    user_id = ""
+                                    for INDEX, mesaj in enumerate(messages):
+                                        
+                                        if INDEX == 10:
+                                            break
+                                        
+                                        content = mesaj['content']
+                                        
+                                        if content.startswith(f'<@{kullanıcı_id}>'):
+                                            
+                                            if mesaj['id'] in okudum:
+                                                pass
+                                            else:
+                                                okudum.append(mesaj["id"])
+                                                mesaj_ıd = mesaj["id"]
+                                                user_id = mesaj['author']['id']
+                                                username = mesaj['author']['username']
+                                                gcontent = mesaj["content"]
+                                                break
+                            if user_id == "":
                                 pass
                             else:
-                                okudum.append(mesaj["id"])
-                                user_id = mesaj['author']['id']
-                                username = mesaj['author']['username']
-                                gcontent = mesaj["content"]
                                 break
+                                        
+                        if messages:
+                            # burası ÇOK ÖNEMLİ buraya sayıyı bulunca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
+                            if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler!'):
+                                
+                                Correct_Number_Count += 1
+                                yazı = f"Doğru sayı bulundu doğru sayı: {wcount}, Bu {Correct_Number_Count}. Doğrumuz."
+                                print(f"{yazı:<35}{zaman:>70}")
+                                count = 1
+                                log_to_database_log(
+                                    zaman, yazı, username, user_id, gcontent, mesaj_ıd)
+                                break
+                            
+                            # burası ÇOK ÖNEMLİ buraya sayıyı bulunamayınca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
+                            elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan'):
+                                
+                                yazı = f"Tekrar Mesajı gönderildi: {wcount}"
+                                log_to_database_log(
+                                    zaman, yazı, username, user_id, gcontent, mesaj_ıd)
+                                break
+                            
+                            else:
+                                
+                                random_value = random.choice(range(1, 6))
+                                time.sleep(int(random_value))
+                                
+                                random_value = random.choice(range(1, 6))
+                                time.sleep(int(random_value))
+                                
+                                with open("Logs/extra.txt", "a", encoding="utf-8") as dosya:
+                                    dosya.write(
+                                        f"Bot yanıt vermiyor yada belirlediğiniz bot yanıtları yanlış ayarlanmış.{zaman:>70}\n")
+                                    username = "Null"
+                                    user_id = "Null"
+                                    
+                        else:
+                            print("Kanalda henüz mesaj yok.")
+                                
 
-                    # burası ÇOK ÖNEMLİ buraya sayıyı bulunca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-                    if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler!'):
-                        Correct_Number_Count += 1
-                        yazı = f"Doğru sayı bulundu doğru sayı: {count}, Bu {Correct_Number_Count}. Doğrumuz"
-                        print(f"{yazı:<35}{zaman:>70}")
-                        count = 0
+                            
+                    except Exception as e:
+                        
+                        error_msg = traceback.format_exc()
+                        create_crash_report(error_msg)
+                        print("Bir hata oluştu, crash raporu oluşturuldu.")
+                        break
 
 
-
-                        log_to_database_log(
-                            zaman, yazı, username, user_id, gcontent)
-
-
-                        count += 1
-                        pass
-                    # burası ÇOK ÖNEMLİ buraya sayıyı bulunamayınca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-                    elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan'):
-                        yazı = f"Mesaj gönderildi: {count}"
-
-                        log_to_database_log(
-                            zaman, yazı, username, user_id, gcontent)
-
-                        count += 1
-                        pass
 
                     else:
-                        time.sleep(3)
-                        random_value = random.choice(range(1, 6))
-                        time.sleep(int(random_value))
-                        random_value = random.choice(range(1, 6))
-                        time.sleep(int(random_value))
-                        while True:
-                            with quit_flag_lock:
-                                if quit_flag.value:
-                                    exit(1)
-                                    break
+                        
+                        print("Kanalda henüz mesaj yok.")
 
-                            if count > 100:
-                                count = 1
-                            wcount = count
-
-                            payload = {
-                                'content': str(wcount)
-                            }
-                            headers = {
-                                'Authorization': f'{token}'
-                            }
-
-                            try:
-                                
-                                r = requests.post(f'https://discord.com/api/v9/channels/{channel_id}/messages',data=payload, headers=headers)
-
-                                if r.status_code == 200:
-                                    zaman = datetime.datetime.now(tz).strftime("%Y-%m-%d   %H:%M:%S")
-                                    Mesaj_gönderildi = time.time()
-                                    mesaj_tekrar = f"Tekrar mesajı gönderildi: {wcount}"
-                                    print(f"{mesaj_tekrar:<35}{zaman:>70}")
-
-
-                                else:
-                                    mesaj = f"Mesaj gönderilirken bir hata oluştu (1): {r.status_code}"
-                                    print(f"{mesaj:<50}{zaman:>70}")
-
-                            except Exception as e:
-                                error_msg = traceback.format_exc()
-                                create_crash_report(error_msg)
-                                print("Bir hata oluştu, crash raporu oluşturuldu.")
-                                break
-
-                            time.sleep(1)
-
-                            try:
-                                
-                                r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',headers=headers)
-                                if r.status_code == 200:
-                                    messages = r.json()
-                                    if messages:
-                                        gcontent = ""
-                                        username = ""
-                                        user_id = ""
-                                        for INDEX, mesaj in enumerate(messages):
-                                            if INDEX == 10:
-                                                break
-                                            content = mesaj['content']
-                                            if content.startswith(f'<@{kullanıcı_id}>'):
-                                                if mesaj['id'] in okudum:
-                                                    pass
-                                                else:
-                                                    okudum.append(mesaj["id"])
-                                                    user_id = mesaj['author']['id']
-                                                    username = mesaj['author']['username']
-                                                    gcontent = mesaj["content"]
-                                                    break
-                                            
-                                    if messages:
-
-
-                                        # burası ÇOK ÖNEMLİ buraya sayıyı bulunca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-                                        if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler!'):
-                                            Correct_Number_Count += 1
-                                            yazı = f"Doğru sayı bulundu doğru sayı: {wcount}, Bu {Correct_Number_Count}. Doğrumuz."
-                                            print(f"{yazı:<35}{zaman:>70}")
-                                            count = 1
-
-
-                                            log_to_database_log(zaman, yazı, username, user_id, gcontent)
-
-
-
-
-
-                                            break
-                                        # burası ÇOK ÖNEMLİ buraya sayıyı bulunamayınca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-                                        elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan'):
-                                            
-                                            yazı = f"Tekrar Mesajı gönderildi: {wcount}"
-
-                                            log_to_database_log(
-                                                zaman, yazı, username, user_id, gcontent)
-                                            break
-                                        else:
-                                            random_value = random.choice(range(1, 6))
-                                            time.sleep(int(random_value))
-                                            random_value = random.choice(range(1, 6))
-                                            time.sleep(int(random_value))
-                                            with open("Logs/extra.txt", "a", encoding="utf-8") as dosya:
-                                                dosya.write(
-                                                    f"Bot yanıt vermiyor yada belirlediğiniz bot yanıtları yanlış ayarlanmış.{zaman:>70}\n")
-                                                username = "Null"
-                                                user_id = "Null"
-
-                                    else:
-                                        print("Kanalda henüz mesaj yok.")
-                                else:
-                                    print(f"Mesajları alırken bir hata oluştu (1): {r.status_code}")
-                            except Exception as e:
-                                error_msg = traceback.format_exc()
-                                create_crash_report(error_msg)
-                                print("Bir hata oluştu, crash raporu oluşturuldu.")
-                                break
-
-
-
-                else:
-                    print("Kanalda henüz mesaj yok.")
-            else:
-                print(f"Mesajları alırken bir hata oluştu: {r.status_code}")
         except Exception as e:
+            
             error_msg = traceback.format_exc()
             create_crash_report(error_msg)
             print("Bir hata oluştu, crash raporu oluşturuldu.")
