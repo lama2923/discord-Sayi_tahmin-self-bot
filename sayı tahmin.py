@@ -15,7 +15,6 @@ import multiprocessing
 import random
 
 
-
 token = 'x' # Buraya kendi kullanıcı tokeninizi koymanız gerekiyor
 
 channel_id = 'x' # Buraya sayı tahmin oynayacağınız kanalın idsini koymanız gerekiyor
@@ -25,7 +24,7 @@ kullanıcı_id = 'x' # Burası Önemsiz! kodu incelersiz neden koyduğumu anlars
 
 kullanıcı_kontrolü_açılsın_mı = False #burası çok önemli, eğer burası True ise izin_Verilen_Idler'in içindeki idli kullanıcıların/botların mesajlarına duyarlı olur, False ise herhangi bir ayrım yapmaz
 
-izin_Verilen_Idler = [] #buraya duyarlı olan kullanıcı/bot ıdlerini giriniz, Sadece kullanıcı_kontrolü_açılsın_mı değişkeni True ise çalışır (int değer giriniz)
+izin_Verilen_Idler = [0] #buraya duyarlı olan kullanıcı/bot ıdlerini giriniz, Sadece kullanıcı_kontrolü_açılsın_mı değişkeni True ise çalışır (int değer giriniz)
 
 
 
@@ -168,8 +167,9 @@ def bot_thread(quit_flag):
         time.sleep(1)
 
         try:
+            fc = 0
             for x in range(1, 15):
-                
+                fc += 1
                 r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
                 
                 if r.status_code == 200:
@@ -180,7 +180,7 @@ def bot_thread(quit_flag):
                         gcontent = ""
                         username = ""
                         user_id = ""
-                        time.sleep(0.3)
+
                         for INDEX, mesaj in enumerate(messages):
                             if INDEX == 10:
                                 break
@@ -210,12 +210,14 @@ def bot_thread(quit_flag):
                                         user_id = mesaj['author']['id']
                                         username = mesaj['author']['username']
                                         gcontent = mesaj["content"]
-                                        break    
+                                        break
+                    
                 else:
                     print(f"Mesaj alınırken hata oluştur : {r.status_code}")        
                                             
                 if user_id == "":
-                    time.sleep(0.3)
+                    
+                    time.sleep((fc * 0.30))
                     pass
                 else:
                     break
@@ -288,25 +290,26 @@ def bot_thread(quit_flag):
                         break
                     time.sleep(1)
                     try:
+                        fc = 0
                         for x in range(1, 15):
-                            
-                            r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
-                                             headers=headers)
+                            fc += 1
+                            r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
+
                             if r.status_code == 200:
-                                
                                 messages = r.json()
                                 if messages:
-                                    
+
+                                
                                     gcontent = ""
                                     username = ""
                                     user_id = ""
+                                    
                                     for INDEX, mesaj in enumerate(messages):
-                                        
                                         if INDEX == 10:
                                             break
                                         
                                         content = mesaj['content']
-                                        
+
                                         if content.startswith(f'<@{kullanıcı_id}>'): #buraya hem botun doğru hemde yanlış sayı tuttuğunuzda gönderdiği mesajın ilk kelimelerini yazınınz.
                                             if kullanıcı_kontrolü_açılsın_mı:
                                                 if int(mesaj["author"]["id"]) in izin_Verilen_Idler:
@@ -330,11 +333,14 @@ def bot_thread(quit_flag):
                                                     user_id = mesaj['author']['id']
                                                     username = mesaj['author']['username']
                                                     gcontent = mesaj["content"]
-                                                    break    
+                                                    break
+                                                
                             else:
-                                print(f"Mesaj alınırken hata oluştur : {r.status_code} (1)")
+                                print(f"Mesaj alınırken hata oluştur : {r.status_code}")        
+
                             if user_id == "":
-                                time.sleep(0.3)
+
+                                time.sleep((fc * 0.30))
                                 pass
                             else:
                                 break
