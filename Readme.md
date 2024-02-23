@@ -21,6 +21,6 @@ sayı tahmin.py dosyasındaki Token, Id gibi ayarlamaları yaptıktan sonra baş
 
 
 
-Geliştirici: [lama2923]
+Geliştirici: lama2923
 
 
