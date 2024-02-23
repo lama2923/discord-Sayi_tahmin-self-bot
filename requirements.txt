@@ -1,4 +1,4 @@
 requests
-pyt
-sqlit
-tk
+pytz
+sqlite3
+tkinter
