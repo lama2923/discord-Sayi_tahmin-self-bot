@@ -23,7 +23,9 @@ channel_id = 'x' # Buraya sayı tahmin oynayacağınız kanalın idsini koymanı
 kullanıcı_id = 'x' # Burası Önemsiz! kodu incelersiz neden koyduğumu anlarsınız diye düşünüyorum! ama sizin doldurmanıza gerek yok! (opyisonel belki sizde techno bot ile yapıcaksınz)
 
 
+kullanıcı_kontrolü_açılsın_mı = False #burası çok önemli, eğer burası True ise izin_Verilen_Idler'in içindeki idli kullanıcıların/botların mesajlarına duyarlı olur, False ise herhangi bir ayrım yapmaz
 
+izin_Verilen_Idler = [] #buraya duyarlı olan kullanıcı/bot ıdlerini giriniz, Sadece kullanıcı_kontrolü_açılsın_mı değişkeni True ise çalışır (int değer giriniz)
 
 
 
@@ -166,7 +168,7 @@ def bot_thread(quit_flag):
         time.sleep(1)
 
         try:
-            for x in range(1, 8):
+            for x in range(1, 15):
                 
                 r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', headers=headers)
                 
@@ -184,27 +186,43 @@ def bot_thread(quit_flag):
                                 break
                             
                             content = mesaj['content']
-                            if content.startswith(f'<@{kullanıcı_id}>'):
-                                
-                                if mesaj['id'] in okudum:
-                                    pass
+                            
+                            if content.startswith(f'<@{kullanıcı_id}>'): #buraya hem botun doğru hemde yanlış sayı tuttuğunuzda gönderdiği mesajın ilk kelimelerini yazınınz.
+                                if kullanıcı_kontrolü_açılsın_mı:
+                                    if int(mesaj["author"]["id"]) in izin_Verilen_Idler:
+                                        
+                                        if mesaj['id'] in okudum:
+                                            pass
+                                        else:
+
+                                            okudum.append(mesaj["id"])
+                                            mesaj_ıd = mesaj["id"]
+                                            user_id = mesaj['author']['id']
+                                            username = mesaj['author']['username']
+                                            gcontent = mesaj["content"]
+                                            break
                                 else:
-                                    
-                                    okudum.append(mesaj["id"])
-                                    mesaj_ıd = mesaj["id"]
-                                    user_id = mesaj['author']['id']
-                                    username = mesaj['author']['username']
-                                    gcontent = mesaj["content"]
-                                    break
-                                
+                                    if mesaj['id'] in okudum:
+                                        pass
+                                    else:
+                                        okudum.append(mesaj["id"])
+                                        mesaj_ıd = mesaj["id"]
+                                        user_id = mesaj['author']['id']
+                                        username = mesaj['author']['username']
+                                        gcontent = mesaj["content"]
+                                        break    
+                else:
+                    print(f"Mesaj alınırken hata oluştur : {r.status_code}")        
+                                            
                 if user_id == "":
+                    time.sleep(0.3)
                     pass
                 else:
                     break
 
                         
             # burası ÇOK ÖNEMLİ buraya sayıyı bulunca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-            if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler!'):
+            if gcontent.startswith(f'<@{kullanıcı_id}>, Tebrikler! Tuttuğum sayı `{count}`'):
                 
                 Correct_Number_Count += 1
                 yazı = f"Doğru sayı bulundu doğru sayı: {count}, Bu {Correct_Number_Count}. Doğrumuz"
@@ -218,7 +236,7 @@ def bot_thread(quit_flag):
                 
                 pass
             # burası ÇOK ÖNEMLİ buraya sayıyı bulunamayınca botun size gönderdiği mesajın ilk 2-3 cümlesini eksiksiz koymanız lazım ve ayrıca sizin gözünüzle gördüğünüz kodda öyle yazılmıyor örnek : gözle görünen : @lama2923  kodda görünen: <@886616962678030427>
-            elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan'):
+            elif gcontent.startswith(f'<@{kullanıcı_id}>, Yazılan sayı `{count}'):
                 yazı = f"Mesaj gönderildi: {count}"
                 log_to_database_log(
                     zaman, yazı, username, user_id, gcontent, mesaj_ıd)
@@ -270,7 +288,7 @@ def bot_thread(quit_flag):
                         break
                     time.sleep(1)
                     try:
-                        for x in range(1, 8):
+                        for x in range(1, 15):
                             
                             r = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
                                              headers=headers)
@@ -289,18 +307,34 @@ def bot_thread(quit_flag):
                                         
                                         content = mesaj['content']
                                         
-                                        if content.startswith(f'<@{kullanıcı_id}>'):
-                                            
-                                            if mesaj['id'] in okudum:
-                                                pass
+                                        if content.startswith(f'<@{kullanıcı_id}>'): #buraya hem botun doğru hemde yanlış sayı tuttuğunuzda gönderdiği mesajın ilk kelimelerini yazınınz.
+                                            if kullanıcı_kontrolü_açılsın_mı:
+                                                if int(mesaj["author"]["id"]) in izin_Verilen_Idler:
+
+                                                    if mesaj['id'] in okudum:
+                                                        pass
+                                                    else:
+                                                    
+                                                        okudum.append(mesaj["id"])
+                                                        mesaj_ıd = mesaj["id"]
+                                                        user_id = mesaj['author']['id']
+                                                        username = mesaj['author']['username']
+                                                        gcontent = mesaj["content"]
+                                                        break
                                             else:
-                                                okudum.append(mesaj["id"])
-                                                mesaj_ıd = mesaj["id"]
-                                                user_id = mesaj['author']['id']
-                                                username = mesaj['author']['username']
-                                                gcontent = mesaj["content"]
-                                                break
+                                                if mesaj['id'] in okudum:
+                                                    pass
+                                                else:
+                                                    okudum.append(mesaj["id"])
+                                                    mesaj_ıd = mesaj["id"]
+                                                    user_id = mesaj['author']['id']
+                                                    username = mesaj['author']['username']
+                                                    gcontent = mesaj["content"]
+                                                    break    
+                            else:
+                                print(f"Mesaj alınırken hata oluştur : {r.status_code} (1)")
                             if user_id == "":
+                                time.sleep(0.3)
                                 pass
                             else:
                                 break
